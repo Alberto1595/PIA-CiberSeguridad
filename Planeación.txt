@@ -1,0 +1,15 @@
+Web-Scrapping
+---
+27.Whois ----- Freddie
+12.Google Search ---- Jesus
+13.Request (Verificación de la existencia de la pagina) ----- Freddie
+14. Beatiful Soup ----- Andrea --- Reporte en HTML
+15. API shodan ---- Alberto
+---> Busqueda de FTP una vez encontrado la pagina
+
+Escaneo de puertos
+Cifrado de mensajes
+Emvio de correos y sms (twillio)
+Obtencion de metadatos*
+
+
