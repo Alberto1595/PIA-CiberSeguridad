@@ -30,5 +30,4 @@ def obtener_enlaces_desde_url(url):
     except Exception as e:
         print("Ocurrió un error inesperado:", e)
 
-        return(obtener_enlaces_desde_url)
 
