@@ -3,7 +3,7 @@ from CreatePDF import create_pdf
 
 def scanning(begin, end, target):
     scanner = nmap.PortScanner()
-    results = ["Puerto","Estado"]
+    results = ["Puerto","Estado"] ####VERIFICAR
 
     for i in range(begin, end + 1):
         res = scanner.scan(target, str(i))
