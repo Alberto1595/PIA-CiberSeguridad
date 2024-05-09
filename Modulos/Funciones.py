@@ -105,11 +105,12 @@ def obtener_enlaces_desde_url(url):
         
         soup = BeautifulSoup(r.text, 'html.parser')
 
-        
+        lista_url = []
         for link in soup.find_all('a'):
             href = link.get('href')
             if href is not None and href.strip() != '':
-                print(href)
+                lista_url.append(href)
+        return lista_url
 
     except requests.exceptions.RequestException as e:
         print("Error al realizar la solicitud HTTP:", e)
@@ -170,5 +171,45 @@ def metadatos_pdf(pdf):
     contenido = primera_hoja.extract_text()
     resultados.append(contenido)
     return resultados
+
+def url_vt(url, API_KEY):
+    def url_report(url):
+        url_scan = "https://virustotal.com/vtapi/v2/url/report"
+        vparams = {"apikey": API_KEY, "resource": url}
+        response = requests.get(url_scan, params=vparams)
+        return response.json()
+    
+    def url_report_write(json_file, url):
+        if json_file["response_code"] != 1:
+            exit()
+        
+        directorio = os.getcwd()
+        directorio = directorio + "\\ReporteVT"
+        os.makedirs(directorio, exist_ok=True)
+        ruta = directorio + "\\reporteVT.txt"
+        report_url = open(ruta, "w")
+
+        file_info = "URL" + url + "\n"
+        scan_date = "Fecha del escaneo: " + json_file["scan_date"] + "\n"
+        number_positive = "Escaneos positivos: " + str(json_file["positives"]) + "\n"
+        total_scan = "Total de escaneos: " + str(json_file["total"]) + "\n\n"
+
+        report_url.write(file_info + scan_date + number_positive + total_scan)
+
+        if "scans" in json_file:
+            for antivirus, result in json_file["scans"].items():
+                detected = "SI" if result["detected"] else "NO"
+                malware_details = result["result"] if result["result"] else "Ninguno"
+                line = f"{antivirus}: Malware detectado: {detected} | Detalles del malware: {malware_details} \n"
+                report_url.write(line)
+        else:
+            report_url.write("El archivo aún no ha sido analizado por todos los motores de antivirus.\n")
+        
+        report_url.close()
+
+    def url_scan(x):
+        url_report_write(url_report(x), url)
+
+    url_scan(url)
 
 
