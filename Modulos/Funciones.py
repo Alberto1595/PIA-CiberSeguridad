@@ -1,7 +1,7 @@
 import os
 
 from googlesearch import search
-import base64, requests, nmap
+import base64, requests, nmap, subprocess, pickle
 from bs4 import BeautifulSoup
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -211,5 +211,55 @@ def url_vt(url, API_KEY):
         url_report_write(url_report(x), url)
 
     url_scan(url)
+
+def obt_hash(basefile, objetivo, tmpfile):
+
+    
+    try:
+        directorio = os.getcwd()
+        directorio += "\Hash"
+        os.makedirs(directorio, exist_ok=True)
+        with open(os.path.join(directorio, tmpfile), "w") as file:
+            file.write("")
+        temporalfile = "Hash\\" + tmpfile
+
+        contenido = """param(
+            [string]$TargetFolder="c:\windows\system32\drivers\",
+            [string]$ResultFile="baseline.txt"
+        )
+
+        Get-ChildItem $TargetFolder | Get-FileHash | Select-Object -Property Hash, Path | Format-Table -HideTableHeaders | Out-File $ResultFile -Encoding ascii
+        """
+        with open(os.path.join(directorio, "HashAcquire.ps1"), "w") as file:
+            file.write(contenido)
+        
+        command = "powershell -ExecutionPolicy ByPass -File Hash\HashAcquire.ps1 -TargetFolder \""+ objetivo + "\" -ResultFile \"" + temporalfile +"\""
+
+        powerShellResult = subprocess.run(command, stdout=subprocess.PIPE)
+        
+        if powerShellResult.stderr == None:
+        
+            baseDict = {}
+
+            with open(os.paht.join(directorio,tmpfile), "r") as inFile:
+                for eachLine in inFile:
+                    lineList = eachLine.split()
+                    if len(lineList) == 2:
+                        hashValue = lineList[0]
+                        fileName = lineList[1]
+                        baseDict[hashValue] = fileName
+                    else:
+                        continue
+
+            with open(os.path.join(directorio, basefile), "wb") as outFile:
+                pickle.dump(baseDict, outFile)
+                
+        
+        else:
+            pass
+    
+    except Exception:
+        pass
+
 
 
