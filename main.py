@@ -2,7 +2,7 @@ import os
 try:
     #Importa las librerias necesarias para el funcionamiento del script 
     from googlesearch import search
-    import base64, requests, logging, argparse, nmap
+    import base64, requests, logging, argparse, nmap, subprocess, pickle
     from requests.packages.urllib3.exceptions import InsecureRequestWarning
     from bs4 import BeautifulSoup
     from reportlab.lib import colors
@@ -73,6 +73,22 @@ parser_escaneo.add_argument("-objetivo", dest="objetivo", help="IP a escanear")
 meta_pdf = subparsers.add_parser("metapdf", help="Obtencion de metadatos de un pdf")
 meta_pdf.add_argument("-pdf", dest="rutapdf", help="Ruta del pdf a analizar")
 
+#Virustotal
+scan_vt = subparsers.add_parser("virustotal", help="Comprobar una url con la api de virustotal")
+scan_vt.add_argument("-urlvt", dest="urlvt", help="URL a escanear")
+scan_vt.add_argument("-apik", dest="apik", help="Key de virustotal")
+
+#Obtener hash
+parser_hash = subparsers.add_parser("hash", description="Modulo para obtener valor hash de un directorio\n"
+                                                        "Ejemplo de uso:\n"
+                                                        "       - py main.py hash -b Nombre de archivo base + .pickle"
+                                                        "       -p Directorio objetivo"
+                                                        "       -t Archivo temporal",
+                                                        formatter_class=argparse.RawTextHelpFormatter)
+parser_hash.add_argument("-b", dest="baseline", help="Archivo base")
+parser_hash.add_argument("-p", dest="path", help="Objetivo a buscar hash")
+parser_hash.add_argument("-tmp", dest="tmp", help="Archivo temporal")
+
 
 params = parser.parse_args()
 
@@ -126,7 +142,16 @@ if __name__ == "__main__":
 
         elif module_to_run == "url":
 
-            Funciones.obtener_enlaces_desde_url(params.url)
+            bs_result = Funciones.obtener_enlaces_desde_url(params.url)
+            directorio = os.getcwd()
+            directorio += "\\geturl"
+            os.makedirs(directorio, exist_ok=True)
+            ruta = directorio + "\\geturl.txt"
+            file = open(ruta, "w")
+            for elemento in bs_result:
+                file.write(str(elemento))
+                file.write("\n")
+            file.close
 
         elif module_to_run == "escaneo":
             start = int(params.puerto1)
@@ -145,6 +170,14 @@ if __name__ == "__main__":
                 file.write(elemento)
                 file.write("\n")
             file.close
+
+        elif module_to_run == "virustotal":
+
+            Funciones.url_vt(params.urlvt, params.apik)
+
+        elif module_to_run == "hash":
+
+            Funciones.obt_hash(params.baseline, params.path, params.tmp)
         
         else:
             
